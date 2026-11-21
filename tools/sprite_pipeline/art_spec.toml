@@ -1,0 +1,159 @@
+# Art spec for the Google Flow -> Godot sprite pipeline.
+#
+#   python tools/sprite_pipeline/pipeline.py prompts   # write prompts/PROMPTS.md
+#   (generate in Google Flow, save images into tools/sprite_pipeline/flow_raw/)
+#   python tools/sprite_pipeline/pipeline.py process   # -> godot/assets/...
+#
+# Attack animations are added automatically for every move in
+# godot/data/characters/*.json; you only describe the look here.
+
+[style]
+# Prepended to every prompt. Keep it identical across all generations so the
+# whole cast shares one look.
+preamble = "2D fighting game character sprite, hand-painted cel-shaded illustration, bold clean outlines, vivid colors, dramatic but readable silhouette"
+# Every character/pose prompt ends with this. The pipeline keys out the green.
+framing = "full body visible from head to feet, side view facing to the RIGHT of the image, character centered, feet on the bottom third, flat solid pure green #00FF00 background, no ground shadow, no floor, no text, no watermark, no other characters or objects"
+stage_framing = "wide 16:9 2D fighting game stage background, side-on view, flat empty floor running across the bottom fifth of the image, no characters, no people, no text, painterly, depth and atmosphere"
+# Chroma key colour the prompts ask for (the processor also auto-detects the
+# actual border colour, since generators rarely hit it exactly).
+key_color = "#00FF00"
+# texture pixels per world pixel (2 = sprites look sharp on 1080p+ screens)
+supersample = 2
+
+[characters.ryokan]
+look = "Ryokan, a disciplined martial artist in his late twenties, athletic build, royal-blue karate gi with light-blue trim and sash, light-blue cloth headband, short black hair, bare feet, taped fists, calm focused expression"
+
+[characters.shadow]
+look = "Shadow, a lean agile ninja, deep-purple fitted shinobi suit, long flowing magenta scarf, face mask covering nose and mouth, glowing amber eyes, wrapped forearms and shins, light split-toe boots, kunai holster on the thigh"
+
+[characters.titan]
+look = "Titan, a towering heavyweight brawler, massive shoulders and arms, crimson armored chest plate with orange glowing seams, iron gauntlets, dark trousers, heavy boots, shaved head, stern face with a short beard"
+
+# --- poses shared by every character -------------------------------------
+# frames: how many images make the loop.  height: figure height relative to
+# standing (the processor scales each frame so its silhouette is this tall).
+# tier 1 = needed for the game to look complete; tier 2 = polish.
+[poses.idle]
+tier = 1
+frames = 4
+fps = 8
+loop = true
+pose = "fighting stance, guard up, weight on back leg, slight breathing motion"
+
+[poses.walk_forward]
+tier = 1
+frames = 6
+fps = 10
+loop = true
+pose = "walking forward toward the right in a guarded fighting stance"
+
+[poses.walk_backward]
+tier = 2
+frames = 6
+fps = 10
+loop = true
+pose = "stepping backward cautiously, guard up, leaning away to the left"
+
+[poses.crouch]
+tier = 1
+frames = 1
+loop = false
+height = 0.70
+pose = "low crouch, knees deeply bent, guard up in front of the face"
+
+[poses.jump]
+tier = 1
+frames = 3
+fps = 6
+loop = false
+height = 0.85
+pose = "mid-air jump, knees tucked, arms ready"
+
+[poses.block_stand]
+tier = 2
+frames = 1
+loop = false
+pose = "standing block, both forearms raised in front of the face and chest, bracing"
+
+[poses.block_crouch]
+tier = 2
+frames = 1
+loop = false
+height = 0.70
+pose = "crouching block, low, forearms raised to protect the head"
+
+[poses.hit]
+tier = 1
+frames = 2
+fps = 8
+loop = false
+height = 0.95
+pose = "recoiling from a hit to the face, head snapped back, staggering to the left"
+
+[poses.knockdown]
+tier = 2
+frames = 3
+fps = 6
+loop = false
+height = 0.40
+pose = "knocked down, falling backward onto the ground"
+
+[poses.dash_forward]
+tier = 2
+frames = 2
+fps = 12
+loop = true
+pose = "dashing forward low and fast, leaning toward the right"
+
+[poses.dash_backward]
+tier = 2
+frames = 2
+fps = 12
+loop = true
+pose = "hopping backward quickly, leaning away to the left"
+
+[poses.victory]
+tier = 2
+frames = 4
+fps = 6
+loop = true
+pose = "victory pose, confident and triumphant"
+
+# Generic attack fallbacks (used for any move without its own art).
+# Attacks have three phases that are timed by frame data in the game.
+[poses.punch]
+tier = 1
+phases = true
+pose = "punch toward the right"
+
+[poses.kick]
+tier = 1
+phases = true
+pose = "kick toward the right"
+
+[poses.special]
+tier = 2
+phases = true
+pose = "signature special technique toward the right"
+
+[portrait]
+pose = "head and shoulders portrait, three-quarter view, determined expression"
+
+[[stages]]
+id = "training_hall"
+name = "Training Hall"
+look = "a traditional wooden martial arts dojo at dusk, paper sliding doors, warm lantern light, polished wooden floor"
+# fraction of image height where the fighters' feet should stand
+floor_y = 0.82
+
+[[stages]]
+id = "harbor_dusk"
+name = "Harbor Dusk"
+look = "a quiet fishing harbor at sunset, wooden pier, moored boats, gulls, orange and violet sky, weathered planks underfoot"
+floor_y = 0.82
+
+[[stages]]
+id = "neon_rooftop"
+name = "Neon Rooftop"
+look = "a city rooftop at night in the rain, neon signs, water towers, distant skyscrapers, wet concrete floor reflecting the lights"
+floor_y = 0.82

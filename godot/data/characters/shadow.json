@@ -1,0 +1,377 @@
+{
+  "id": "shadow",
+  "name": "Shadow",
+  "subtitle": "The Silent Assassin",
+  "body_style": "slim",
+  "stats": {
+    "max_health": 80,
+    "walk_speed": 6.5,
+    "jump_force": -19.5,
+    "gravity": 0.8,
+    "forward_dash_speed": 14.0,
+    "back_dash_speed": 8.0,
+    "dash_duration": 14,
+    "back_dash_duration": 15,
+    "back_dash_invincible_frames": 5,
+    "width": 50,
+    "height": 110,
+    "crouch_height": 72,
+    "head_radius": 17
+  },
+  "colors": {
+    "body": "#641478",
+    "body_dark": "#3c0a50",
+    "limb": "#500f64",
+    "accent": "#c850ff",
+    "eye": "#ffc864",
+    "outline": "#000000"
+  },
+  "has_air_dash": true,
+  "has_double_jump": true,
+  "armor_hits": 0,
+  "normals": [
+    {
+      "id": "shadow_lp_high",
+      "name": "Fast Jab",
+      "button": "punch",
+      "height": "mid",
+      "move_type": "normal",
+      "damage": 5,
+      "chip": 1,
+      "startup": 2,
+      "active": 2,
+      "recovery": 4,
+      "hitstun": 10,
+      "blockstun": 5,
+      "knockback_x": 1.5,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 35,
+        "h": 18,
+        "x": 0,
+        "y": 0
+      },
+      "hitstop": 6,
+      "cancel_window": 5,
+      "properties": [
+        "chain_cancel",
+        "special_cancel"
+      ],
+      "heavy": false
+    },
+    {
+      "id": "shadow_lp_low",
+      "name": "Crouch Jab",
+      "button": "punch",
+      "height": "low",
+      "move_type": "normal",
+      "damage": 4,
+      "chip": 1,
+      "startup": 2,
+      "active": 2,
+      "recovery": 4,
+      "hitstun": 9,
+      "blockstun": 4,
+      "knockback_x": 1.0,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 45,
+        "h": 16,
+        "x": 0,
+        "y": 30
+      },
+      "hitstop": 6,
+      "cancel_window": 5,
+      "properties": [
+        "chain_cancel",
+        "special_cancel"
+      ],
+      "heavy": false
+    },
+    {
+      "id": "shadow_hp_straight",
+      "name": "Palm Strike",
+      "button": "punch",
+      "height": "mid",
+      "move_type": "normal",
+      "damage": 12,
+      "chip": 1,
+      "startup": 7,
+      "active": 3,
+      "recovery": 10,
+      "hitstun": 16,
+      "blockstun": 8,
+      "knockback_x": 4.0,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 42,
+        "h": 24,
+        "x": 0,
+        "y": 0
+      },
+      "hitstop": 6,
+      "cancel_window": 8,
+      "properties": [
+        "special_cancel"
+      ],
+      "heavy": true
+    },
+    {
+      "id": "shadow_hp_high",
+      "name": "Axe Kick",
+      "button": "punch",
+      "height": "overhead",
+      "move_type": "normal",
+      "damage": 14,
+      "chip": 1,
+      "startup": 10,
+      "active": 4,
+      "recovery": 14,
+      "hitstun": 18,
+      "blockstun": 10,
+      "knockback_x": 5.0,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 45,
+        "h": 25,
+        "x": 0,
+        "y": -20
+      },
+      "hitstop": 6,
+      "cancel_window": 10,
+      "properties": [
+        "special_cancel",
+        "launcher"
+      ],
+      "heavy": true
+    },
+    {
+      "id": "shadow_lk_straight",
+      "name": "Snap Kick",
+      "button": "kick",
+      "height": "mid",
+      "move_type": "normal",
+      "damage": 6,
+      "chip": 1,
+      "startup": 4,
+      "active": 3,
+      "recovery": 6,
+      "hitstun": 11,
+      "blockstun": 5,
+      "knockback_x": 2.5,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 40,
+        "h": 24,
+        "x": 0,
+        "y": 0
+      },
+      "hitstop": 6,
+      "cancel_window": 5,
+      "properties": [
+        "chain_cancel",
+        "special_cancel"
+      ],
+      "heavy": false
+    },
+    {
+      "id": "shadow_lk_low",
+      "name": "Ankle Kick",
+      "button": "kick",
+      "height": "low",
+      "move_type": "normal",
+      "damage": 5,
+      "chip": 1,
+      "startup": 4,
+      "active": 2,
+      "recovery": 6,
+      "hitstun": 10,
+      "blockstun": 4,
+      "knockback_x": 2.0,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 45,
+        "h": 25,
+        "x": 0,
+        "y": 30
+      },
+      "hitstop": 6,
+      "cancel_window": 5,
+      "properties": [
+        "chain_cancel",
+        "special_cancel",
+        "low_profile"
+      ],
+      "heavy": false
+    },
+    {
+      "id": "shadow_hk_straight",
+      "name": "Spinning Back Kick",
+      "button": "kick",
+      "height": "mid",
+      "move_type": "normal",
+      "damage": 15,
+      "chip": 1,
+      "startup": 9,
+      "active": 5,
+      "recovery": 14,
+      "hitstun": 20,
+      "blockstun": 12,
+      "knockback_x": 10.0,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 50,
+        "h": 30,
+        "x": 0,
+        "y": 0
+      },
+      "hitstop": 8,
+      "cancel_window": 12,
+      "properties": [
+        "special_cancel",
+        "super_cancel"
+      ],
+      "heavy": true
+    },
+    {
+      "id": "shadow_hk_low",
+      "name": "Slide Kick",
+      "button": "kick",
+      "height": "low",
+      "move_type": "normal",
+      "damage": 12,
+      "chip": 1,
+      "startup": 8,
+      "active": 6,
+      "recovery": 16,
+      "hitstun": 16,
+      "blockstun": 8,
+      "knockback_x": 8.0,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 55,
+        "h": 25,
+        "x": 0,
+        "y": 30
+      },
+      "hitstop": 4,
+      "cancel_window": 0,
+      "properties": [
+        "low_profile"
+      ],
+      "heavy": true
+    }
+  ],
+  "specials": [
+    {
+      "name": "Shadow Port",
+      "motion": "qcf",
+      "button": "punch",
+      "meter_cost": 0,
+      "is_super": false,
+      "attack": {
+        "id": "shadow_teleport",
+        "name": "Shadow Port",
+        "button": "special",
+        "height": "mid",
+        "move_type": "special",
+        "damage": 0,
+        "chip": 1,
+        "startup": 4,
+        "active": 2,
+        "recovery": 8,
+        "hitstun": 0,
+        "blockstun": 0,
+        "knockback_x": 0,
+        "knockback_y": 0.0,
+        "hitbox": {
+          "w": 45,
+          "h": 25,
+          "x": 0,
+          "y": 0
+        },
+        "hitstop": 0,
+        "cancel_window": 0,
+        "properties": [
+          "invincible_all"
+        ],
+        "teleport_behind": true
+      }
+    },
+    {
+      "name": "Shadow Grab",
+      "motion": "hcb",
+      "button": "kick",
+      "meter_cost": 0,
+      "is_super": false,
+      "attack": {
+        "id": "shadow_grab",
+        "name": "Shadow Grab",
+        "button": "special",
+        "height": "mid",
+        "move_type": "special",
+        "damage": 16,
+        "chip": 1,
+        "startup": 5,
+        "active": 3,
+        "recovery": 22,
+        "hitstun": 30,
+        "blockstun": 0,
+        "knockback_x": 6.0,
+        "knockback_y": -10.0,
+        "hitbox": {
+          "w": 40,
+          "h": 50,
+          "x": 0,
+          "y": 0
+        },
+        "hitstop": 8,
+        "cancel_window": 0,
+        "properties": [
+          "throw",
+          "launcher",
+          "invincible_startup"
+        ]
+      }
+    },
+    {
+      "name": "Kunai Toss",
+      "motion": "qcb",
+      "button": "punch",
+      "meter_cost": 0,
+      "is_super": false,
+      "attack": {
+        "id": "shadow_kunai",
+        "name": "Kunai Toss",
+        "button": "special",
+        "height": "mid",
+        "move_type": "special",
+        "damage": 8,
+        "chip": 1,
+        "startup": 6,
+        "active": 2,
+        "recovery": 14,
+        "hitstun": 12,
+        "blockstun": 6,
+        "knockback_x": 6.0,
+        "knockback_y": 0.0,
+        "hitbox": {
+          "w": 20,
+          "h": 12,
+          "x": 0,
+          "y": 0
+        },
+        "hitstop": 3,
+        "cancel_window": 0,
+        "properties": [
+          "projectile"
+        ],
+        "projectile": {
+          "speed": 11.0,
+          "lifetime": 90,
+          "y_offset": -80
+        }
+      }
+    }
+  ]
+}

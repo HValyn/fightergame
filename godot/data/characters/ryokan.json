@@ -1,0 +1,375 @@
+{
+  "id": "ryokan",
+  "name": "Ryokan",
+  "subtitle": "The Balanced Warrior",
+  "body_style": "rectangle",
+  "stats": {
+    "max_health": 100,
+    "walk_speed": 5.0,
+    "jump_force": -18.0,
+    "gravity": 0.8,
+    "forward_dash_speed": 12.0,
+    "back_dash_speed": 8.0,
+    "dash_duration": 12,
+    "back_dash_duration": 15,
+    "back_dash_invincible_frames": 5,
+    "width": 60,
+    "height": 120,
+    "crouch_height": 80,
+    "head_radius": 20
+  },
+  "colors": {
+    "body": "#3264c8",
+    "body_dark": "#1e4696",
+    "limb": "#2850b4",
+    "accent": "#64b4ff",
+    "eye": "#ffffff",
+    "outline": "#000000"
+  },
+  "has_air_dash": false,
+  "has_double_jump": false,
+  "armor_hits": 0,
+  "normals": [
+    {
+      "id": "ryokan_lp_high",
+      "name": "Light Jab",
+      "button": "punch",
+      "height": "mid",
+      "move_type": "normal",
+      "damage": 6,
+      "chip": 1,
+      "startup": 3,
+      "active": 3,
+      "recovery": 6,
+      "hitstun": 12,
+      "blockstun": 6,
+      "knockback_x": 2.0,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 40,
+        "h": 22,
+        "x": 0,
+        "y": 0
+      },
+      "hitstop": 6,
+      "cancel_window": 4,
+      "properties": [
+        "chain_cancel",
+        "special_cancel"
+      ],
+      "heavy": false
+    },
+    {
+      "id": "ryokan_lp_low",
+      "name": "Low Jab",
+      "button": "punch",
+      "height": "low",
+      "move_type": "normal",
+      "damage": 5,
+      "chip": 1,
+      "startup": 3,
+      "active": 3,
+      "recovery": 5,
+      "hitstun": 10,
+      "blockstun": 5,
+      "knockback_x": 1.5,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 45,
+        "h": 20,
+        "x": 0,
+        "y": 40
+      },
+      "hitstop": 6,
+      "cancel_window": 4,
+      "properties": [
+        "chain_cancel",
+        "special_cancel"
+      ],
+      "heavy": false
+    },
+    {
+      "id": "ryokan_hp_straight",
+      "name": "Strong Straight",
+      "button": "punch",
+      "height": "mid",
+      "move_type": "normal",
+      "damage": 14,
+      "chip": 1,
+      "startup": 8,
+      "active": 4,
+      "recovery": 12,
+      "hitstun": 18,
+      "blockstun": 10,
+      "knockback_x": 5.0,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 50,
+        "h": 28,
+        "x": 0,
+        "y": 0
+      },
+      "hitstop": 8,
+      "cancel_window": 10,
+      "properties": [
+        "special_cancel"
+      ],
+      "heavy": true
+    },
+    {
+      "id": "ryokan_hp_high",
+      "name": "Overhead Smash",
+      "button": "punch",
+      "height": "overhead",
+      "move_type": "normal",
+      "damage": 16,
+      "chip": 1,
+      "startup": 12,
+      "active": 4,
+      "recovery": 16,
+      "hitstun": 20,
+      "blockstun": 12,
+      "knockback_x": 6.0,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 45,
+        "h": 25,
+        "x": 0,
+        "y": -30
+      },
+      "hitstop": 8,
+      "cancel_window": 12,
+      "properties": [
+        "special_cancel"
+      ],
+      "heavy": true
+    },
+    {
+      "id": "ryokan_lk_straight",
+      "name": "Quick Kick",
+      "button": "kick",
+      "height": "mid",
+      "move_type": "normal",
+      "damage": 8,
+      "chip": 1,
+      "startup": 5,
+      "active": 3,
+      "recovery": 8,
+      "hitstun": 12,
+      "blockstun": 6,
+      "knockback_x": 3.0,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 45,
+        "h": 28,
+        "x": 0,
+        "y": 0
+      },
+      "hitstop": 6,
+      "cancel_window": 6,
+      "properties": [
+        "chain_cancel",
+        "special_cancel"
+      ],
+      "heavy": false
+    },
+    {
+      "id": "ryokan_lk_low",
+      "name": "Low Sweep",
+      "button": "kick",
+      "height": "low",
+      "move_type": "normal",
+      "damage": 7,
+      "chip": 1,
+      "startup": 6,
+      "active": 4,
+      "recovery": 10,
+      "hitstun": 13,
+      "blockstun": 7,
+      "knockback_x": 2.5,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 45,
+        "h": 25,
+        "x": 0,
+        "y": 35
+      },
+      "hitstop": 6,
+      "cancel_window": 6,
+      "properties": [
+        "chain_cancel",
+        "special_cancel",
+        "low_profile"
+      ],
+      "heavy": false
+    },
+    {
+      "id": "ryokan_hk_straight",
+      "name": "Roundhouse",
+      "button": "kick",
+      "height": "mid",
+      "move_type": "normal",
+      "damage": 16,
+      "chip": 1,
+      "startup": 10,
+      "active": 5,
+      "recovery": 16,
+      "hitstun": 22,
+      "blockstun": 14,
+      "knockback_x": 8.0,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 55,
+        "h": 32,
+        "x": 0,
+        "y": 0
+      },
+      "hitstop": 8,
+      "cancel_window": 14,
+      "properties": [
+        "special_cancel",
+        "super_cancel"
+      ],
+      "heavy": true
+    },
+    {
+      "id": "ryokan_hk_low",
+      "name": "Heavy Sweep",
+      "button": "kick",
+      "height": "low",
+      "move_type": "normal",
+      "damage": 14,
+      "chip": 1,
+      "startup": 10,
+      "active": 5,
+      "recovery": 18,
+      "hitstun": 20,
+      "blockstun": 14,
+      "knockback_x": 6.0,
+      "knockback_y": 2.0,
+      "hitbox": {
+        "w": 45,
+        "h": 25,
+        "x": 0,
+        "y": 35
+      },
+      "hitstop": 8,
+      "cancel_window": 14,
+      "properties": [
+        "special_cancel",
+        "launcher"
+      ],
+      "heavy": true
+    }
+  ],
+  "specials": [
+    {
+      "name": "Fireball",
+      "motion": "qcf",
+      "button": "punch",
+      "meter_cost": 0,
+      "is_super": false,
+      "attack": {
+        "id": "ryokan_fireball",
+        "name": "Fireball",
+        "button": "special",
+        "height": "mid",
+        "move_type": "special",
+        "damage": 12,
+        "chip": 1,
+        "startup": 10,
+        "active": 1,
+        "recovery": 20,
+        "hitstun": 18,
+        "blockstun": 10,
+        "knockback_x": 10.0,
+        "knockback_y": 0.0,
+        "hitbox": {
+          "w": 30,
+          "h": 30,
+          "x": 0,
+          "y": 0
+        },
+        "hitstop": 4,
+        "cancel_window": 0,
+        "properties": [
+          "projectile"
+        ],
+        "projectile": {
+          "speed": 7.0,
+          "lifetime": 150,
+          "y_offset": -70
+        }
+      }
+    },
+    {
+      "name": "Rising Uppercut",
+      "motion": "dpf",
+      "button": "punch",
+      "meter_cost": 0,
+      "is_super": false,
+      "attack": {
+        "id": "ryokan_uppercut",
+        "name": "Rising Uppercut",
+        "button": "special",
+        "height": "high",
+        "move_type": "special",
+        "damage": 18,
+        "chip": 1,
+        "startup": 3,
+        "active": 6,
+        "recovery": 24,
+        "hitstun": 28,
+        "blockstun": 14,
+        "knockback_x": 5.0,
+        "knockback_y": -12.0,
+        "hitbox": {
+          "w": 45,
+          "h": 60,
+          "x": 0,
+          "y": -40
+        },
+        "hitstop": 10,
+        "cancel_window": 0,
+        "properties": [
+          "launcher",
+          "invincible_startup"
+        ]
+      }
+    },
+    {
+      "name": "Hurricane Kick",
+      "motion": "qcb",
+      "button": "kick",
+      "meter_cost": 0,
+      "is_super": false,
+      "attack": {
+        "id": "ryokan_tatsumaki",
+        "name": "Hurricane Kick",
+        "button": "special",
+        "height": "mid",
+        "move_type": "special",
+        "damage": 14,
+        "chip": 1,
+        "startup": 8,
+        "active": 12,
+        "recovery": 18,
+        "hitstun": 16,
+        "blockstun": 8,
+        "knockback_x": 4.0,
+        "knockback_y": -6.0,
+        "hitbox": {
+          "w": 45,
+          "h": 40,
+          "x": 0,
+          "y": 0
+        },
+        "hitstop": 4,
+        "cancel_window": 0,
+        "properties": [
+          "airborne"
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,384 @@
+{
+  "id": "titan",
+  "name": "Titan",
+  "subtitle": "The Unstoppable Force",
+  "body_style": "trapezoid",
+  "stats": {
+    "max_health": 130,
+    "walk_speed": 3.5,
+    "jump_force": -15.0,
+    "gravity": 0.8,
+    "forward_dash_speed": 9.0,
+    "back_dash_speed": 8.0,
+    "dash_duration": 15,
+    "back_dash_duration": 15,
+    "back_dash_invincible_frames": 5,
+    "width": 75,
+    "height": 130,
+    "crouch_height": 90,
+    "head_radius": 24
+  },
+  "colors": {
+    "body": "#c83c28",
+    "body_dark": "#96281e",
+    "limb": "#b43223",
+    "accent": "#ff8c28",
+    "eye": "#ffffff",
+    "outline": "#000000"
+  },
+  "has_air_dash": false,
+  "has_double_jump": false,
+  "armor_hits": 1,
+  "normals": [
+    {
+      "id": "titan_lp_straight",
+      "name": "Power Jab",
+      "button": "punch",
+      "height": "mid",
+      "move_type": "normal",
+      "damage": 8,
+      "chip": 1,
+      "startup": 5,
+      "active": 3,
+      "recovery": 8,
+      "hitstun": 14,
+      "blockstun": 8,
+      "knockback_x": 3.0,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 50,
+        "h": 28,
+        "x": 0,
+        "y": 0
+      },
+      "hitstop": 6,
+      "cancel_window": 5,
+      "properties": [
+        "chain_cancel",
+        "special_cancel",
+        "armor"
+      ],
+      "heavy": false
+    },
+    {
+      "id": "titan_lp_low",
+      "name": "Low Slam",
+      "button": "punch",
+      "height": "low",
+      "move_type": "normal",
+      "damage": 7,
+      "chip": 1,
+      "startup": 5,
+      "active": 3,
+      "recovery": 7,
+      "hitstun": 12,
+      "blockstun": 6,
+      "knockback_x": 2.5,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 45,
+        "h": 25,
+        "x": 0,
+        "y": 40
+      },
+      "hitstop": 6,
+      "cancel_window": 5,
+      "properties": [
+        "chain_cancel",
+        "special_cancel",
+        "armor"
+      ],
+      "heavy": false
+    },
+    {
+      "id": "titan_hp_straight",
+      "name": "Hammer Fist",
+      "button": "punch",
+      "height": "mid",
+      "move_type": "normal",
+      "damage": 22,
+      "chip": 1,
+      "startup": 12,
+      "active": 5,
+      "recovery": 18,
+      "hitstun": 24,
+      "blockstun": 16,
+      "knockback_x": 10.0,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 60,
+        "h": 35,
+        "x": 0,
+        "y": 0
+      },
+      "hitstop": 12,
+      "cancel_window": 14,
+      "properties": [
+        "special_cancel",
+        "super_cancel",
+        "armor"
+      ],
+      "heavy": true
+    },
+    {
+      "id": "titan_hp_high",
+      "name": "Titan Slam",
+      "button": "punch",
+      "height": "overhead",
+      "move_type": "normal",
+      "damage": 26,
+      "chip": 1,
+      "startup": 16,
+      "active": 5,
+      "recovery": 22,
+      "hitstun": 28,
+      "blockstun": 18,
+      "knockback_x": 12.0,
+      "knockback_y": -4.0,
+      "hitbox": {
+        "w": 55,
+        "h": 40,
+        "x": 0,
+        "y": -30
+      },
+      "hitstop": 14,
+      "cancel_window": 16,
+      "properties": [
+        "special_cancel",
+        "launcher",
+        "armor"
+      ],
+      "heavy": true
+    },
+    {
+      "id": "titan_lk_straight",
+      "name": "Thrust Kick",
+      "button": "kick",
+      "height": "mid",
+      "move_type": "normal",
+      "damage": 10,
+      "chip": 1,
+      "startup": 7,
+      "active": 4,
+      "recovery": 10,
+      "hitstun": 15,
+      "blockstun": 8,
+      "knockback_x": 4.0,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 50,
+        "h": 30,
+        "x": 0,
+        "y": 0
+      },
+      "hitstop": 6,
+      "cancel_window": 7,
+      "properties": [
+        "chain_cancel",
+        "special_cancel"
+      ],
+      "heavy": false
+    },
+    {
+      "id": "titan_lk_low",
+      "name": "Low Crush",
+      "button": "kick",
+      "height": "low",
+      "move_type": "normal",
+      "damage": 9,
+      "chip": 1,
+      "startup": 8,
+      "active": 4,
+      "recovery": 12,
+      "hitstun": 14,
+      "blockstun": 8,
+      "knockback_x": 3.5,
+      "knockback_y": 0.0,
+      "hitbox": {
+        "w": 45,
+        "h": 25,
+        "x": 0,
+        "y": 35
+      },
+      "hitstop": 6,
+      "cancel_window": 7,
+      "properties": [
+        "chain_cancel",
+        "special_cancel",
+        "low_profile"
+      ],
+      "heavy": false
+    },
+    {
+      "id": "titan_hk_straight",
+      "name": "Earth Shaker",
+      "button": "kick",
+      "height": "mid",
+      "move_type": "normal",
+      "damage": 28,
+      "chip": 1,
+      "startup": 16,
+      "active": 6,
+      "recovery": 24,
+      "hitstun": 32,
+      "blockstun": 20,
+      "knockback_x": 16.0,
+      "knockback_y": -4.0,
+      "hitbox": {
+        "w": 65,
+        "h": 38,
+        "x": 0,
+        "y": 0
+      },
+      "hitstop": 14,
+      "cancel_window": 18,
+      "properties": [
+        "special_cancel",
+        "super_cancel",
+        "armor",
+        "wall_bounce"
+      ],
+      "heavy": true
+    },
+    {
+      "id": "titan_hk_low",
+      "name": "Earthquake Stomp",
+      "button": "kick",
+      "height": "low",
+      "move_type": "normal",
+      "damage": 20,
+      "chip": 1,
+      "startup": 14,
+      "active": 6,
+      "recovery": 22,
+      "hitstun": 26,
+      "blockstun": 16,
+      "knockback_x": 8.0,
+      "knockback_y": -8.0,
+      "hitbox": {
+        "w": 60,
+        "h": 35,
+        "x": 0,
+        "y": 30
+      },
+      "hitstop": 12,
+      "cancel_window": 16,
+      "properties": [
+        "special_cancel",
+        "launcher",
+        "armor"
+      ],
+      "heavy": true
+    }
+  ],
+  "specials": [
+    {
+      "name": "Ground Pound",
+      "motion": "charge_down",
+      "button": "kick",
+      "meter_cost": 0,
+      "is_super": false,
+      "attack": {
+        "id": "titan_groundpound",
+        "name": "Ground Pound",
+        "button": "special",
+        "height": "low",
+        "move_type": "special",
+        "damage": 20,
+        "chip": 1,
+        "startup": 6,
+        "active": 8,
+        "recovery": 24,
+        "hitstun": 24,
+        "blockstun": 16,
+        "knockback_x": 12.0,
+        "knockback_y": -10.0,
+        "hitbox": {
+          "w": 80,
+          "h": 40,
+          "x": 0,
+          "y": 0
+        },
+        "hitstop": 10,
+        "cancel_window": 0,
+        "properties": [
+          "launcher",
+          "armor",
+          "ground_bounce"
+        ]
+      }
+    },
+    {
+      "name": "Armor Rush",
+      "motion": "charge_back",
+      "button": "punch",
+      "meter_cost": 0,
+      "is_super": false,
+      "attack": {
+        "id": "titan_armorrush",
+        "name": "Armor Rush",
+        "button": "special",
+        "height": "mid",
+        "move_type": "special",
+        "damage": 24,
+        "chip": 1,
+        "startup": 8,
+        "active": 6,
+        "recovery": 20,
+        "hitstun": 22,
+        "blockstun": 14,
+        "knockback_x": 14.0,
+        "knockback_y": 0.0,
+        "hitbox": {
+          "w": 60,
+          "h": 40,
+          "x": 0,
+          "y": 0
+        },
+        "hitstop": 10,
+        "cancel_window": 0,
+        "properties": [
+          "armor",
+          "invincible_startup"
+        ]
+      }
+    },
+    {
+      "name": "Mega Slam",
+      "motion": "hcf",
+      "button": "punch",
+      "meter_cost": 0,
+      "is_super": false,
+      "attack": {
+        "id": "titan_megaslam",
+        "name": "Mega Slam",
+        "button": "special",
+        "height": "mid",
+        "move_type": "special",
+        "damage": 30,
+        "chip": 1,
+        "startup": 6,
+        "active": 4,
+        "recovery": 26,
+        "hitstun": 36,
+        "blockstun": 0,
+        "knockback_x": 8.0,
+        "knockback_y": -14.0,
+        "hitbox": {
+          "w": 50,
+          "h": 55,
+          "x": 0,
+          "y": 0
+        },
+        "hitstop": 12,
+        "cancel_window": 0,
+        "properties": [
+          "throw",
+          "launcher",
+          "invincible_startup",
+          "wall_bounce"
+        ]
+      }
+    }
+  ]
+}
