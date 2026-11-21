@@ -3,8 +3,10 @@ Main Game Loop — character select, round system, match management, and the cor
 This is the entry point: python main.py
 """
 
-import pygame
+import random
 import sys
+
+import pygame
 
 pygame.init()
 pygame.font.init()
@@ -29,7 +31,7 @@ class Game:
 
     def __init__(self):
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption("2D Fighter V3 — Refactored Engine")
+        pygame.display.set_caption("Fightergame — pygame prototype")
         self.clock = pygame.time.Clock()
         self.running = True
 
@@ -165,7 +167,7 @@ class Game:
 
         # AI picks a random character (different from player)
         available = [c for c in self.character_choices if c[0] != char_id]
-        ai_char_id = available[0][0] if available else self.character_choices[0][0]
+        ai_char_id = random.choice(available)[0] if available else char_id
         ai_char = get_character(ai_char_id)
 
         self._init_fighters(p1_char, ai_char)
@@ -201,6 +203,8 @@ class Game:
         self.fighter2 = Fighter(p2_char, 900, player_id=2)
         self.ai_controller = AIController(p2_char, self.difficulties[self.difficulty_idx])
         self.current_frame = 0
+        self._ai_last_combo = 0
+        self._ai_was_blocked = False
 
     def _recreate_ai(self):
         """Recreate the AI with the new difficulty (same character)."""
@@ -239,9 +243,6 @@ class Game:
             current_frame=self.current_frame,
         )
 
-        # Notify AI of hit results
-        if self.fighter2.has_hit_opponent and self.fighter2.combo_count > 1:
-            self.ai_controller.on_hit_landed(self.fighter2.combo_count)
 
         # Update Player 2 (AI input)
         self.fighter2.update(
@@ -249,6 +250,14 @@ class Game:
             current_frame=self.current_frame,
             ai_input=ai_input,
         )
+
+        # Notify AI of hit / block results (once per event, not every frame)
+        if self.fighter2.combo_count > self._ai_last_combo:
+            self.ai_controller.on_hit_landed(self.fighter2.combo_count)
+        self._ai_last_combo = self.fighter2.combo_count
+        if self.fighter2.attack_was_blocked and not self._ai_was_blocked:
+            self.ai_controller.on_blocked()
+        self._ai_was_blocked = self.fighter2.attack_was_blocked
 
         # Pushbox collision
         self._handle_pushbox_collision()
@@ -282,12 +291,13 @@ class Game:
 
     def _check_round_end(self):
         """Check if the round should end."""
+        # Score BEFORE _end_round so the match-over check sees the new total
         if self.fighter1.health <= 0:
-            self._end_round("CPU Wins!")
             self.p2_score += 1
+            self._end_round("CPU Wins!")
         elif self.fighter2.health <= 0:
-            self._end_round("Player 1 Wins!")
             self.p1_score += 1
+            self._end_round("Player 1 Wins!")
 
     def _end_round(self, winner_text: str):
         """Handle round end."""

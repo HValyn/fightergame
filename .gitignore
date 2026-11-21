@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+# Godot
+godot/.godot/
+godot/export_presets.cfg.local
+*.import.tmp
+# Sprite pipeline working dirs
+tools/sprite_pipeline/_work/
+flow_raw/

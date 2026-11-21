@@ -110,11 +110,8 @@ class InputHandler:
                 BufferedInput(input_state=state, frame_pressed=self.current_frame)
             )
 
-        # Update motion detector with direction
-        direction = state.get_direction()
-        # We don't have facing here — it will be set from outside
-        # Store the raw direction for later resolution
-        self.motion_detector.buffer.append(direction)
+        # Directions are pushed to the motion detector by update_motion_direction(),
+        # which the Fighter calls with its facing so the buffer can be normalised.
         self._last_input = state
         self.buffer.append(state)
         self.current_frame += 1
@@ -127,16 +124,11 @@ class InputHandler:
 
     def update_motion_direction(self, direction: str, facing: int = 1):
         """
-        Update motion detector with the current direction, resolved for facing.
-        Called externally by the Fighter which knows its facing direction.
+        Push this frame's direction to the motion detector, normalised for facing.
+        Called once per frame by the Fighter (which knows its facing direction).
+        This also advances charge timers.
         """
-        # Replace the last entry in the motion buffer with the resolved one
-        if self.motion_detector.buffer:
-            self.motion_detector.buffer[-1] = (
-                self.motion_detector._resolve_direction(direction, facing)
-            )
-        else:
-            self.motion_detector.push_direction(direction, facing)
+        self.motion_detector.push_direction(direction, facing)
 
     def get_current(self) -> InputState:
         return self.buffer[-1] if self.buffer else InputState()

@@ -10,7 +10,7 @@ import pygame
 
 from constants import (
     GROUND_Y, SCREEN_WIDTH, COYOTE_TIME_FRAMES, COMBO_DECAY_WINDOW, MAX_COMBO_DAMAGE_SCALING,
-    FighterState, AttackType, AttackHeight, AttackProperty, FacingDirection,
+    FighterState, AttackType, AttackHeight, AttackProperty, FacingDirection, MoveType,
     InputState, AttackData, Box, BoxType, CharacterStats,
 )
 from character_defs import CharacterDef
@@ -73,9 +73,13 @@ class Fighter:
         self.blockstun_frames = 0
         self.hitstun_direction = 0
 
-        # Blocking
+        # Blocking. block_direction is the SCREEN direction being held away
+        # (-1 = holding left, +1 = holding right, 0 = not blocking).
         self.is_blocking = False
         self.block_direction = 0
+        self.block_crouching = False
+        self.attack_was_blocked = False
+        self.attack_started_airborne = False
 
         # Combo
         self.combo_count = 0
@@ -128,8 +132,14 @@ class Fighter:
         return int(self.pos_y)
 
     @property
-    def current_height(self) -> int:
+    def is_crouching(self) -> bool:
         if self.state in (FighterState.CROUCH, FighterState.BLOCK_CROUCHING):
+            return True
+        return self.state == FighterState.BLOCKSTUN and self.block_crouching
+
+    @property
+    def current_height(self) -> int:
+        if self.is_crouching:
             return self.stats.crouch_height
         if self.current_attack and self.current_attack.height == AttackHeight.LOW:
             return self.stats.crouch_height
@@ -148,7 +158,8 @@ class Fighter:
 
     @property
     def can_attack(self) -> bool:
-        return self.can_act and (self.is_grounded or self.coyote_time_remaining > 0)
+        # Air attacks are allowed: JUMP is an actionable state.
+        return self.can_act
 
     @property
     def is_in_attack_state(self) -> bool:
@@ -165,6 +176,11 @@ class Fighter:
     # =========================================================================
     def update(self, opponent: 'Fighter', current_frame: int, keys_pressed=None, ai_input=None):
         """Main update — called every frame by the game loop."""
+        # The attacker's combo ends once the opponent is no longer stunned.
+        if self.combo_count and opponent.state not in (FighterState.HITSTUN, FighterState.KNOCKDOWN):
+            self.combo_count = 0
+            self.combo_damage = 0
+
         # Process input
         if ai_input is not None:
             current_input = self.input_handler.push_ai_input(ai_input)
@@ -175,10 +191,9 @@ class Fighter:
         facing_int = 1 if self.facing_right else -1
         self.input_handler.update_motion_direction(current_input.get_direction(), facing_int)
 
-        # Hitstop freeze
+        # Hitstop freeze: no state, no physics (knockback is applied after the freeze)
         if self.hitstop_frames > 0:
             self.hitstop_frames -= 1
-            self._apply_physics()
             self._update_render_position()
             self.renderer.update(self.state, self.current_attack)
             return
@@ -207,6 +222,8 @@ class Fighter:
         """Route to the appropriate state handler."""
         if self.state == FighterState.HITSTUN:
             self._update_hitstun()
+        elif self.state == FighterState.BLOCKSTUN:
+            self._update_blockstun(current_input)
         elif self.state == FighterState.KNOCKDOWN:
             self._update_knockdown()
         elif self.is_in_attack_state:
@@ -214,12 +231,12 @@ class Fighter:
         elif self.state in (FighterState.DASH_FORWARD, FighterState.DASH_BACKWARD):
             self._update_dash()
         else:
-            # Can act — face opponent, check movement, check attacks
-            if self.state not in (FighterState.ATTACK_STARTUP, FighterState.ATTACK_ACTIVE,
-                                 FighterState.ATTACK_RECOVERY):
-                self.face_target(opponent.x)
+            # Can act — face opponent, attacks take priority over movement
+            # (so up+button on the frame of a charge release doesn't jump).
+            self.face_target(opponent.x)
+            if self._check_attack_input(current_input, frame):
+                return
             self._update_movement(current_input)
-            self._check_attack_input(current_input, frame)
 
     # =========================================================================
     # MOVEMENT
@@ -228,61 +245,69 @@ class Fighter:
         """Handle movement states: idle, walk, crouch, jump, block, dash."""
         self.block_direction = 0
         self.is_blocking = False
+        self.block_crouching = False
+        prev = self.input_handler.get_previous()
+
+        is_back = ((inp.left and self.facing_right) or
+                   (inp.right and not self.facing_right))
+        is_forward = ((inp.right and self.facing_right) or
+                      (inp.left and not self.facing_right))
+        back_sign = -1 if self.facing_right else 1   # screen direction of "back"
 
         if self.is_grounded:
             self.vel_x = 0
-            moving = False
-            is_back = ((inp.left and self.facing_right) or
-                       (inp.right and not self.facing_right))
-            is_forward = ((inp.right and self.facing_right) or
-                         (inp.left and not self.facing_right))
 
-            if inp.left or inp.right:
-                moving = True
-                if is_back:
-                    # Walking backward = blocking
-                    self.vel_x = -self.stats.walk_speed if self.facing_right else self.stats.walk_speed
-                    self.is_blocking = True
-                    self.block_direction = -1 if self.facing_right else 1
-                    self.state = FighterState.BLOCK_STANDING
-                else:
-                    self.vel_x = self.stats.walk_speed if self.facing_right else -self.stats.walk_speed
-                    self.state = FighterState.WALK_FORWARD
-
-            if inp.down and not inp.up:
-                if self.state != FighterState.BLOCK_STANDING:
-                    self.state = FighterState.CROUCH
-                    self.is_blocking = True
-                    self.block_direction = -1 if self.facing_right else 1
-                    self.state = FighterState.BLOCK_CROUCHING
-                self.vel_x *= self.stats.crouch_speed / self.stats.walk_speed
-
-            # Jump
-            if inp.up and self.jumps_remaining > 0:
+            # Jump (direction chosen at take-off)
+            if inp.up and not inp.down and self.jumps_remaining > 0:
                 self.vel_y = self.stats.jump_force
+                self.vel_x = self.stats.walk_speed * (1 if inp.right else -1 if inp.left else 0)
                 self.state = FighterState.JUMP
                 self.jumps_remaining -= 1
                 self.coyote_time_remaining = 0
                 self.air_dash_used = False
+                return
 
-            if not moving and not inp.down and not inp.up:
-                if self.state != FighterState.BLOCK_STANDING:
-                    self.state = FighterState.IDLE
+            if inp.down:
+                # Crouching. Only down+back blocks (plain down does not).
+                self.state = FighterState.CROUCH
+                if is_back:
+                    self.is_blocking = True
+                    self.block_crouching = True
+                    self.block_direction = back_sign
+            elif is_back:
+                # Walking backward also guards (standing block)
+                self.vel_x = back_sign * self.stats.walk_speed
+                self.is_blocking = True
+                self.block_direction = back_sign
+                self.state = FighterState.WALK_BACKWARD
+            elif is_forward:
+                self.vel_x = -back_sign * self.stats.walk_speed
+                self.state = FighterState.WALK_FORWARD
+            else:
+                self.state = FighterState.IDLE
 
-            # Dash (double tap forward or dedicated button)
-            if self.can_act and inp.heavy and is_forward and not inp.punch and not inp.kick:
-                self._start_dash(forward=True)
-            elif self.can_act and inp.heavy and is_back and not inp.punch and not inp.kick:
-                self._start_dash(forward=False)
+            # Dash: heavy + direction (no attack button)
+            heavy_pressed = inp.heavy and not prev.heavy
+            if heavy_pressed and not inp.punch and not inp.kick and not inp.down:
+                if is_forward:
+                    self._start_dash(forward=True)
+                elif is_back:
+                    self._start_dash(forward=False)
         else:
-            # Air movement
+            # Air control
             if inp.left:
                 self.vel_x = -self.stats.walk_speed * 0.6
             elif inp.right:
                 self.vel_x = self.stats.walk_speed * 0.6
 
+            # Double jump needs a fresh press of up
+            if inp.up and not prev.up and self.jumps_remaining > 0:
+                self.vel_y = self.stats.jump_force * 0.85
+                self.jumps_remaining -= 1
+
             # Air dash
-            if self.character.has_air_dash and not self.air_dash_used and inp.heavy:
+            if (self.character.has_air_dash and not self.air_dash_used
+                    and inp.heavy and not prev.heavy):
                 self._start_dash(forward=True, is_air=True)
                 self.air_dash_used = True
 
@@ -291,7 +316,6 @@ class Fighter:
             self.coyote_time_remaining = COYOTE_TIME_FRAMES
         elif self.is_grounded:
             self.coyote_time_remaining = 0
-            self.jumps_remaining = 2 if self.character.has_double_jump else 1
         self.was_grounded_last_frame = self.is_grounded
         if self.coyote_time_remaining > 0:
             self.coyote_time_remaining -= 1
@@ -312,43 +336,46 @@ class Fighter:
         self.dash_timer -= 1
         self.vel_x = self.dash_speed
         if self.dash_timer <= 0:
-            self.state = FighterState.IDLE
+            self.state = FighterState.IDLE if self.is_grounded else FighterState.JUMP
             self.vel_x = 0
 
     # =========================================================================
     # ATTACK SYSTEM
     # =========================================================================
-    def _check_attack_input(self, current_input: InputState, frame: int):
-        """Check for attack inputs and resolve them via MoveResolver."""
-        if not self.can_attack and not self.is_in_attack_state:
-            return
+    def _check_attack_input(self, current_input: InputState, frame: int) -> bool:
+        """Check for attack inputs and resolve them via MoveResolver. Returns True if one started."""
+        if not self.can_attack:
+            return False
 
-        # Check buffered attacks first
-        if self.can_attack and self.input_handler.has_buffered_attack():
+        # Buffered attacks first (pressed during recovery/stun, replayed now)
+        if self.input_handler.has_buffered_attack():
             buffered = self.input_handler.consume_buffered_attack()
-            if buffered:
-                self._resolve_and_start_attack(buffered, frame)
-                return
+            if buffered and self._resolve_and_start_attack(buffered, frame):
+                return True
 
-        # Check current input
-        if self.can_attack and current_input.has_attack():
-            prev = self.input_handler.get_previous()
-            if any([
-                current_input.punch and not prev.punch,
-                current_input.kick and not prev.kick,
-                current_input.special and not prev.special,
-            ]):
-                self._resolve_and_start_attack(current_input, frame)
+        # Fresh press this frame
+        if current_input.has_attack() and self._has_fresh_press(current_input):
+            return self._resolve_and_start_attack(current_input, frame)
+        return False
 
-    def _resolve_and_start_attack(self, inp: InputState, frame: int):
-        """Use MoveResolver to find the right attack and start it."""
-        facing_int = 1 if self.facing_right else -1
-        attack = self.move_resolver.resolve_input(
+    def _has_fresh_press(self, inp: InputState) -> bool:
+        prev = self.input_handler.get_previous()
+        return ((inp.punch and not prev.punch) or (inp.kick and not prev.kick)
+                or (inp.special and not prev.special))
+
+    def _resolve_attack(self, inp: InputState) -> Optional[AttackData]:
+        return self.move_resolver.resolve_input(
             inp, self.state, self.is_grounded, self.facing_right,
             self.input_handler.motion_detector, self.super_meter,
         )
+
+    def _resolve_and_start_attack(self, inp: InputState, frame: int) -> bool:
+        """Use MoveResolver to find the right attack and start it."""
+        attack = self._resolve_attack(inp)
         if attack:
             self.start_attack(attack)
+            return True
+        return False
 
     def start_attack(self, attack: AttackData):
         """Begin executing an attack."""
@@ -356,10 +383,25 @@ class Fighter:
         self.attack_frame = 0
         self.state = FighterState.ATTACK_STARTUP
         self.has_hit_opponent = False
+        self.attack_was_blocked = False
         self.can_cancel_attack = False
-        self.vel_x = 0
+        self.attack_started_airborne = not self.is_grounded
+        if self.is_grounded:
+            self.vel_x = 0          # keep air momentum for jump-ins
         self.active_hitbox = None
-        self.input_handler.reset_charges()
+        self.is_blocking = False
+        self.block_direction = 0
+        if attack.move_type in (MoveType.SPECIAL, MoveType.SUPER):
+            # Specials consume the motion (and any stored charge)
+            self.input_handler.motion_detector.consume()
+            self.input_handler.reset_charges()
+
+    def _cancel_allowed(self, current: AttackData, nxt: AttackData) -> bool:
+        if nxt.move_type == MoveType.SUPER:
+            return current.has_property(AttackProperty.SUPER_CANCEL)
+        if nxt.move_type == MoveType.SPECIAL:
+            return current.has_property(AttackProperty.SPECIAL_CANCEL)
+        return current.has_property(AttackProperty.CHAIN_CANCEL) and nxt is not current
 
     def _update_attack(self, opponent: 'Fighter', frame: int):
         """Process the attack through startup -> active -> recovery."""
@@ -394,11 +436,20 @@ class Fighter:
             self.attack_frame < startup_end + atk.active_frames + atk.cancel_window
         )
 
-        # Check for cancel during recovery
+        # Cancel (fresh press only) into an allowed follow-up
         if self.can_cancel_attack:
+            # Presses made during hitstop are in the buffer, so check it too
             current_input = self.input_handler.get_current()
-            if current_input.has_attack():
-                self._resolve_and_start_attack(current_input, frame)
+            candidate = None
+            if current_input.has_attack() and self._has_fresh_press(current_input):
+                candidate = current_input
+            elif self.input_handler.has_buffered_attack():
+                candidate = self.input_handler.consume_buffered_attack()
+            if candidate is not None:
+                nxt = self._resolve_attack(candidate)
+                if nxt and self._cancel_allowed(atk, nxt):
+                    self.start_attack(nxt)
+                    return
 
         # Attack finished
         if self.attack_frame >= recovery_end:
@@ -418,24 +469,35 @@ class Fighter:
                 break
 
     def _check_height_interaction(self, opponent: 'Fighter') -> bool:
-        """Check if attack height interacts with opponent's stance."""
+        """Does the attack's height allow it to touch the opponent at all?"""
         atk = self.current_attack
         if not atk:
             return False
-        # High attacks miss crouching opponents
-        if atk.height == AttackHeight.HIGH and opponent.state in (
-            FighterState.CROUCH, FighterState.BLOCK_CROUCHING,
-        ):
+        # High attacks whiff over crouching opponents
+        if atk.height == AttackHeight.HIGH and opponent.is_crouching:
             return False
-        # Overhead hits everyone
         return True
 
     def _is_block_correct(self, opponent: 'Fighter') -> bool:
-        """Check if opponent is blocking in the correct direction."""
-        return (
-            (opponent.block_direction == -1 and self.facing_right) or
-            (opponent.block_direction == 1 and not self.facing_right)
-        )
+        """
+        Is the opponent guarding correctly against the current attack?
+        - must hold AWAY from the attacker (by position, so cross-ups work)
+        - lows must be blocked crouching, overheads standing
+        """
+        atk = self.current_attack
+        if not opponent.is_blocking or atk is None:
+            return False
+        if opponent.x != self.x:
+            away = 1 if opponent.x > self.x else -1
+        else:
+            away = 1 if self.facing_right else -1
+        if opponent.block_direction != away:
+            return False
+        if atk.height == AttackHeight.LOW and not opponent.block_crouching:
+            return False
+        if atk.height == AttackHeight.OVERHEAD and opponent.block_crouching:
+            return False
+        return True
 
     def _apply_hit(self, opponent: 'Fighter'):
         """Apply damage, knockback, hitstun to the opponent."""
@@ -443,14 +505,14 @@ class Fighter:
         self.hitstun_direction = 1 if self.x > opponent.x else -1
         is_throw = atk.has_property(AttackProperty.THROW)
 
-        # Check if opponent is blocking in the CORRECT direction
-        if opponent.is_blocking and not is_throw and self._is_block_correct(opponent):
+        # Throws are unblockable; everything else checks direction + height
+        if not is_throw and self._is_block_correct(opponent):
             self._apply_block(opponent, atk)
             return
 
-        # If opponent was blocking wrong direction, clear it so they take the hit
-        if opponent.is_blocking:
-            opponent.is_blocking = False
+        # Wrong guard (direction or height) — they take the hit
+        opponent.is_blocking = False
+        opponent.block_direction = 0
 
         # --- Apply clean hit ---
         # Damage scaling based on combo count
@@ -509,9 +571,12 @@ class Fighter:
         elif chip > 0:
             opponent.health = max(0, opponent.health - chip)
 
-        opponent.hitstun_frames = atk.blockstun_frames
+        opponent.state = FighterState.BLOCKSTUN
+        opponent.blockstun_frames = atk.blockstun_frames
         opponent.hitstop_frames = atk.hitstop // 2
+        opponent.hitstun_direction = self.hitstun_direction * -1
         opponent.vel_x = atk.knockback_x * 0.4 * opponent.hitstun_direction
+        self.attack_was_blocked = True
 
         self.hitstop_frames = atk.hitstop // 2
         self.last_frame_advantage = atk.frame_advantage_on_block
@@ -527,10 +592,6 @@ class Fighter:
     # =========================================================================
     # HITSTUN / KNOCKDOWN
     # =========================================================================
-    def take_hit(self, attack: AttackData, attacker_x: int) -> Tuple[bool, int]:
-        """Called externally when another fighter hits this one. Legacy compat."""
-        pass  # Handled internally via _apply_hit
-
     def _update_hitstun(self):
         """Update hitstun state."""
         self.hitstun_frames -= 1
@@ -539,9 +600,16 @@ class Fighter:
         if self.hitstun_frames <= 0 and self.is_grounded:
             self.state = FighterState.IDLE
             self.vel_x = 0
-            if self.combo_count > 0:
-                self.combo_count = 0
-                self.combo_damage = 0
+
+    def _update_blockstun(self, inp: InputState):
+        """Blockstun: can't act, but guard is held and its height may be changed."""
+        self.blockstun_frames -= 1
+        self.vel_x *= 0.9
+        self.is_blocking = True
+        self.block_crouching = inp.down
+        if self.blockstun_frames <= 0:
+            self.state = FighterState.CROUCH if inp.down else FighterState.IDLE
+            self.vel_x = 0
 
     def _update_knockdown(self):
         """Update knockdown state."""
@@ -553,8 +621,6 @@ class Fighter:
             self.knockdown_timer = 0
             self.state = FighterState.IDLE
             self.vel_x = 0
-            self.combo_count = 0
-            self.combo_damage = 0
 
     # =========================================================================
     # PHYSICS
@@ -569,8 +635,16 @@ class Fighter:
         if self.pos_y > GROUND_Y:
             self.pos_y = GROUND_Y
             self.vel_y = 0
+            self.jumps_remaining = 2 if self.character.has_double_jump else 1
             if self.state == FighterState.JUMP:
                 self.state = FighterState.IDLE
+            elif self.is_in_attack_state and self.attack_started_airborne:
+                # Landing cancels an air attack
+                self.state = FighterState.IDLE
+                self.current_attack = None
+                self.active_hitbox = None
+                self.attack_frame = 0
+                self.vel_x = 0
 
         # Screen boundaries
         hw = self.stats.width // 2
@@ -624,11 +698,17 @@ class Fighter:
             hx = self.x - hw - atk.hitbox_width + 5 - atk.hitbox_offset_x
 
         # Vertical positioning based on attack height
+        # LOW and OVERHEAD are anchored to the body (hitbox_offset_y is ignored):
+        # the old formula put lows under the floor and overheads above a
+        # crouching opponent, so neither could ever connect.
         h = self.current_height
-        if atk.height == AttackHeight.HIGH or atk.height == AttackHeight.OVERHEAD:
+        if atk.height == AttackHeight.HIGH:
             hy = self.y - h - 5 + atk.hitbox_offset_y
+        elif atk.height == AttackHeight.OVERHEAD:
+            # chest-to-waist height: tall enough to hit standing AND crouching bodies
+            hy = self.y - self.stats.height // 2 - atk.hitbox_height
         elif atk.height == AttackHeight.LOW:
-            hy = self.y - h // 2 + 15 + atk.hitbox_offset_y
+            hy = self.y - atk.hitbox_height - 2   # at the feet
         else:  # STRAIGHT / MID
             hy = self.y - h // 2 - atk.hitbox_height // 2 + atk.hitbox_offset_y
 
@@ -667,6 +747,13 @@ class Fighter:
         self.combo_damage = 0
         self.dash_timer = 0
         self.knockdown_timer = 0
+        self.blockstun_frames = 0
+        self.is_blocking = False
+        self.block_direction = 0
+        self.block_crouching = False
+        self.has_hit_opponent = False
+        self.attack_was_blocked = False
+        self.jumps_remaining = 2 if self.character.has_double_jump else 1
         self.input_handler.clear()
         self.renderer.anim.hit_flash_frames = 0
         self.renderer.anim.block_flash_frames = 0

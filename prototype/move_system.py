@@ -120,9 +120,21 @@ class MoveResolver:
         self, buttons: List[str], is_heavy: bool,
         is_down: bool, is_up: bool, is_forward: bool,
     ) -> Optional[AttackData]:
-        """Resolve a ground-based normal attack."""
+        """
+        Resolve a ground-based normal attack.
+        forward + heavy + button -> overhead (if the character has one for that button)
+        down + button            -> low
+        up + button              -> high (falls through to a jump if none exists)
+        """
         for btn in buttons:
+            if btn == "special":
+                continue  # the special button only triggers special moves
             attack_type = AttackType.PUNCH if btn == "punch" else AttackType.KICK
+
+            if is_forward and is_heavy and not is_down:
+                overhead = self.normal_lookup.get((attack_type, AttackHeight.OVERHEAD, True))
+                if overhead:
+                    return overhead
 
             # Determine height
             if is_down:
@@ -150,6 +162,8 @@ class MoveResolver:
     ) -> Optional[AttackData]:
         """Resolve an air normal attack (simplified — uses STRAIGHT height)."""
         for btn in buttons:
+            if btn == "special":
+                continue  # the special button only triggers special moves
             attack_type = AttackType.PUNCH if btn == "punch" else AttackType.KICK
             key = (attack_type, AttackHeight.STRAIGHT, is_heavy)
             attack = self.normal_lookup.get(key)

@@ -9,9 +9,27 @@ from collections import deque
 from typing import Optional, List, Tuple
 
 from constants import (
-    FighterState, AttackType, AttackHeight, AttackProperty,
+    FighterState, AttackType, AttackHeight, AttackProperty, MotionType,
     InputState, AttackData, SpecialMoveDef,
 )
+
+# Stick motions written for a fighter facing RIGHT ("right" = forward).
+# The AI mirrors them when facing left. The last entry is pressed with the button.
+CHARGE_HOLD_FRAMES = 42
+AI_MOTION_SEQUENCES = {
+    MotionType.NONE: [[]],
+    MotionType.QUARTER_CIRCLE_FORWARD: [["down"], ["down", "right"], ["right"]],
+    MotionType.QUARTER_CIRCLE_BACK: [["down"], ["down", "left"], ["left"]],
+    MotionType.DRAGON_PUNCH_FORWARD: [["right"], ["down"], ["down", "right"]],
+    MotionType.DRAGON_PUNCH_BACK: [["left"], ["down"], ["down", "left"]],
+    MotionType.HALF_CIRCLE_FORWARD: [["left"], ["down", "left"], ["down"], ["down", "right"], ["right"]],
+    MotionType.HALF_CIRCLE_BACK: [["right"], ["down", "right"], ["down"], ["down", "left"], ["left"]],
+    MotionType.CHARGE_BACK: [["left"]] * CHARGE_HOLD_FRAMES + [["right"]],
+    MotionType.CHARGE_DOWN: [["down"]] * CHARGE_HOLD_FRAMES + [["up"]],
+    MotionType.SUPER_CHARGE: [["down"], ["down", "right"], ["right"]] * 2,
+    MotionType.ZIGZAG: [["down"], ["up"]],
+}
+_MIRROR = {"left": "right", "right": "left"}
 from character_defs import CharacterDef
 
 
@@ -86,6 +104,11 @@ class AIController:
 
         self.rng = random.Random()
 
+        # Reaction model: the AI only "sees" an attack after reaction_frames
+        self.reaction_frames = self.difficulty.get('reaction_frames', 0)
+        self._opp_attack_frames = 0
+        self._block_decision: Optional[bool] = None
+
     def update(self, opponent_state: FighterState, opponent_x: int,
                opponent_y: float, self_x: int, self_y: float,
                opponent_current_attack: Optional[AttackData],
@@ -106,11 +129,16 @@ class AIController:
         is_active = opponent_state == FighterState.ATTACK_ACTIVE
         is_recovery = opponent_state == FighterState.ATTACK_RECOVERY
 
-        # Priority 1: React to opponent's attack
+        # Priority 1: React to opponent's attack (after a human-like delay)
         if is_startup or is_active:
-            return self._handle_opponent_attack(
-                opponent_current_attack, distance, self_x, self_facing_right
-            )
+            self._opp_attack_frames += 1
+            if self._opp_attack_frames >= self.reaction_frames:
+                return self._handle_opponent_attack(
+                    opponent_current_attack, distance, self_x, self_facing_right
+                )
+        else:
+            self._opp_attack_frames = 0
+            self._block_decision = None
 
         # Priority 2: Punish recovery
         if is_recovery:
@@ -138,17 +166,21 @@ class AIController:
     # =========================================================================
     def _handle_opponent_attack(self, opp_attack, distance, self_x, facing_right) -> InputState:
         inp = InputState()
-        if not opp_attack or self.rng.random() > self.block_chance:
+        if not opp_attack:
+            return inp
+        # Decide ONCE per opponent attack (re-rolling every frame made the guard flicker)
+        if self._block_decision is None:
+            self._block_decision = self.rng.random() < self.block_chance
+        if not self._block_decision:
             return inp
 
-        # Block in the correct direction
+        # Hold away from the opponent
         back_dir = "left" if facing_right else "right"
         setattr(inp, back_dir, True)
 
-        if opp_attack and opp_attack.height == AttackHeight.LOW:
+        # Lows must be blocked crouching; overheads/mids/highs standing
+        if opp_attack.height == AttackHeight.LOW:
             inp.down = True
-        elif opp_attack and opp_attack.height == AttackHeight.HIGH:
-            pass  # Stand block
 
         self.current_behavior = AIBehavior.BLOCK
         return inp
@@ -323,23 +355,26 @@ class AIController:
 
     def _make_special_input(self, sp: SpecialMoveDef, facing_right: bool) -> InputState:
         """
-        Create an InputState that simulates the motion + button for a special.
-        Since the AI doesn't have real motion input timing, we inject the button
-        press and let the motion detector's lenient matching handle it.
+        Perform a special the same way a human would: queue the stick motion
+        frame by frame and press the button on the final frame. Returns the
+        first frame; the rest goes into combo_queue.
         """
-        inp = InputState()
-        # Set the attack button
-        if sp.attack_button == "punch":
-            inp.punch = True
-        elif sp.attack_button == "kick":
-            inp.kick = True
-        elif sp.attack_button == "special":
-            inp.special = True
+        frames = self.build_motion_inputs(sp.motion, sp.attack_button, facing_right)
+        self.combo_queue = frames[1:] + self.combo_queue
+        return frames[0]
 
-        # For the AI, we directly set the required directional states
-        # to help the motion detector recognize the pattern
-        # The motion detector will still validate the sequence
-        return inp
+    @staticmethod
+    def build_motion_inputs(motion: MotionType, button: str, facing_right: bool) -> List[InputState]:
+        seq = AI_MOTION_SEQUENCES.get(motion, [[]])
+        frames: List[InputState] = []
+        for i, dirs in enumerate(seq):
+            inp = InputState()
+            for d in dirs:
+                setattr(inp, d if facing_right else _MIRROR.get(d, d), True)
+            if i == len(seq) - 1:
+                setattr(inp, button, True)
+            frames.append(inp)
+        return frames
 
     def on_hit_landed(self, combo_count: int):
         """Called when the AI's fighter lands a hit — queue follow-up."""
@@ -363,5 +398,7 @@ class AIController:
         self.think_timer = 0
         self.behavior_timer = 0
         self.combo_queue.clear()
+        self._opp_attack_frames = 0
+        self._block_decision = None
         self.opponent_attack_history.clear()
         self.opponent_height_pref = {AttackHeight.HIGH: 0, AttackHeight.STRAIGHT: 0, AttackHeight.LOW: 0}

@@ -81,6 +81,7 @@ class FighterState(Enum):
     BLOCK_STANDING = auto()
     BLOCK_CROUCHING = auto()
     HITSTUN = auto()
+    BLOCKSTUN = auto()
     KNOCKDOWN = auto()
     DASH_FORWARD = auto()
     DASH_BACKWARD = auto()
