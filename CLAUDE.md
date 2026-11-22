@@ -43,11 +43,14 @@ Read `README.md` first for layout, commands and controls. The user knows Python 
 - Sprite frames face right, feet at `anchor`, drawn at `scale` (0.5 = 2x supersampled).
 
 ## Rig art (version 4)
+- **Start with `docs/RIG_PLAN.md`**: decisions, data layout, and the ordered implementation steps.
 - `tools/rig_art/roster.toml` is the source of truth for the 16-fighter roster (province × urban/rural × male/female)
   and for the shared skeleton's part names. `prompts/RIG_PROMPTS.md` is generated from it; edit the roster.
 - Plan for the rig: one shared bone naming for all fighters; the view poses bones from sim state each frame
   (never let AnimationPlayer run on its own clock); attack poses are data keyed to startup/active/recovery so
   frame-data changes retime the animation. `scripts/sim/` stays untouched.
+- The parts sheet is what gets cut; the reference image is never cut. Piece order on the sheet is random, so
+  labelling (piece number → part) is a hand-written file per fighter. Far limbs = darkened near limbs.
 - Loose garments (kameez hems, shalwar, ghagra, chadar, turban tails) need Polygon2D + bone weights or jiggle bones.
 
 ## History

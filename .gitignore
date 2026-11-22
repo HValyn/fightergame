@@ -11,6 +11,7 @@ godot/export_presets.cfg.local
 tools/sprite_pipeline/_work/
 flow_raw/
 rig_raw/
+tools/rig_art/rigs/*/_*
 
 # Export output
 build/

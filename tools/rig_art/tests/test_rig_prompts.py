@@ -33,7 +33,7 @@ def test_movesets_exist_and_are_not_shared(roster):
 
 
 def test_prompts_carry_look_key_and_every_part(roster):
-    near, far = R.part_names(roster["raw"]["skeleton"])
+    near, _far = R.part_names(roster["raw"]["skeleton"])
     for f in roster["fighters"]:
         p = R.build_prompts(roster, f)
         assert set(p) == set(R.IMAGES)
@@ -41,7 +41,7 @@ def test_prompts_carry_look_key_and_every_part(roster):
         assert all(f.key.upper() in text for text in p.values())
         assert "facing to the RIGHT" in p["reference"]
         assert all(part in p["parts"] for part in near + f.cloth + f.props)
-        assert all(part in p["far_parts"] for part in far)
+        assert "exactly one of each part" in p["parts"]
 
 
 def test_markdown_lists_every_image(roster, tmp_path):
@@ -52,3 +52,5 @@ def test_markdown_lists_every_image(roster, tmp_path):
     (tmp_path / "bashir").mkdir()
     (tmp_path / "bashir" / "reference.png").write_bytes(b"")
     assert "- [x] `rig_raw/bashir/reference.png`" in R.render_markdown(roster, raw_root=tmp_path)
+    (tmp_path / "bashir" / "parts.jpg").write_bytes(b"")
+    assert R.raw_file(roster["fighters"][2], "parts", tmp_path).suffix == ".jpg"

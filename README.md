@@ -143,18 +143,20 @@ frame data first: **Ali Changezi** (Quetta karateka) ← `ryokan`, **Hamza** (La
 **Bashir Pehlwan** (Gujranwala kushti wrestler) ← `titan`. The others are concepts with a fighting style; moves come later.
 
 ```bash
-python tools/rig_art/rig_prompts.py prompts   # -> tools/rig_art/prompts/RIG_PROMPTS.md (4 images per fighter)
+python tools/rig_art/rig_prompts.py prompts   # -> tools/rig_art/prompts/RIG_PROMPTS.md (3 images per fighter)
 python tools/rig_art/rig_prompts.py status
 python -m pytest -q tools/rig_art/tests
 ```
 
-Per fighter: `reference.png` (side view, neutral rig pose) first, then `parts.png`, `far_parts.png` and `portrait.png`
-with the reference attached. Save into `tools/rig_art/rig_raw/<id>/` (git-ignored). Each fighter has its own chroma key
+Per fighter: `reference` (the approved look) first, then `parts` (the sheet that actually gets cut) and `portrait`
+with the reference attached. Save into `tools/rig_art/rig_raw/<id>/` as .png or .jpg (git-ignored). Far-side limbs are
+darkened copies of the near ones, so they aren't generated. Each fighter has its own chroma key
 (magenta by default, green for outfits heavy in pinks and reds). Fighters are tagged `easy`/`medium`/`hard` by how
 much loose cloth they have; rig the easy ones first (Bashir, Ali, Shahzaib, Mureed, Palwasha).
 
-Not done yet on this branch: the rig itself (shared skeleton scene, pose-data format, `FighterRig` view node driven
-by sim state), and the tool that slices a parts sheet into separate PNGs.
+Next steps are written up in [docs/RIG_PLAN.md](docs/RIG_PLAN.md): cut the parts sheet (`cut.py`), label the pieces,
+click the joint pivots (`pivots.py`), build `rig.json` (`build_rig.py`), then the `FighterRig` view node and the pose
+library timed by frame data.
 
 ## Status / roadmap
 

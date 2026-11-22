@@ -1,14 +1,15 @@
 """
 Prompts for the Skeleton2D (cutout) art route.
 
-Each fighter needs four generated images instead of ~80 animation frames:
+Each fighter needs three generated images instead of ~80 animation frames:
 
-    rig_raw/<id>/reference.png   full body, side view, neutral rig pose  (generate FIRST)
-    rig_raw/<id>/parts.png       near-side body parts laid out separately (attach reference.png)
-    rig_raw/<id>/far_parts.png   far-side arm + leg, slightly darker      (attach reference.png)
-    rig_raw/<id>/portrait.png    select-screen portrait                    (attach reference.png)
+    rig_raw/<id>/reference.png   full body, the approved look            (generate FIRST; never cut)
+    rig_raw/<id>/parts.png       body parts laid out separately          (attach reference; this is what gets cut)
+    rig_raw/<id>/portrait.png    select-screen portrait                  (attach reference)
 
-The parts are then cut out and placed on the shared Godot skeleton; the animation lives in the rig.
+.png or .jpg both work. Far-side limbs are darkened copies of the near ones (no separate image).
+The parts are cut out and placed on the shared Godot skeleton; the animation lives in the rig.
+See docs/RIG_PLAN.md for the rest of the pipeline.
 
     python tools/rig_art/rig_prompts.py prompts   # -> tools/rig_art/prompts/RIG_PROMPTS.md
     python tools/rig_art/rig_prompts.py status
@@ -28,7 +29,8 @@ RAW = HERE / "rig_raw"
 PROMPTS_OUT = HERE / "prompts" / "RIG_PROMPTS.md"
 
 PROVINCES = ("Punjab", "Sindh", "Khyber Pakhtunkhwa", "Balochistan")
-IMAGES = ("reference", "parts", "far_parts", "portrait")
+IMAGES = ("reference", "parts", "portrait")
+RAW_EXTS = (".png", ".jpg", ".jpeg", ".webp")
 KEY_NAMES = {"#FF00FF": "magenta", "#00FF00": "green", "#0000FF": "blue"}
 
 
@@ -73,13 +75,14 @@ def _bg(key: str) -> str:
 
 def build_prompts(roster: dict, f: Fighter) -> dict[str, str]:
     st = roster["raw"]["style"]
-    near, far = part_names(roster["raw"]["skeleton"])
+    near, _far = part_names(roster["raw"]["skeleton"])
     bg = _bg(f.key)
     same = "Use the attached reference image: the exact same character, same outfit, colours, proportions and art style"
     layout = ("each part drawn in strict side view facing right at the same scale as the reference, "
               "laid out flat in a loose grid with wide empty gaps so that no two parts touch or overlap, "
               "every part has extra rounded material at its joint ends so it can tuck under the neighbouring part "
               "when rotated (round shoulder cap, round elbow, round knee, round hip), "
+              "exactly one of each part, no duplicates, no faded or ghost copy of the whole character in the background, "
               "nothing cropped, no labels, no text, no arrows")
     extras = f.cloth + f.props
     extra_txt = (f", plus these as their own separate pieces: {', '.join(extras)}" if extras else "")
@@ -98,14 +101,6 @@ def build_prompts(roster: dict, f: Fighter) -> dict[str, str]:
             "the pelvis piece carries the waistband and the top of the lower garment",
             layout + ", " + bg,
         ]) + ".",
-        "far_parts": ". ".join([
-            st["preamble"],
-            same,
-            "Parts sheet of the limbs on the far side of the body, which sit behind the torso in a side view: "
-            + ", ".join(far),
-            "Shade them slightly darker and cooler than the near-side limbs, as if in the body's shadow",
-            layout + ", " + bg,
-        ]) + ".",
         "portrait": ". ".join([
             st["preamble"],
             same,
@@ -115,6 +110,11 @@ def build_prompts(roster: dict, f: Fighter) -> dict[str, str]:
 
 
 def raw_file(f: Fighter, image: str, raw_root: Path = RAW) -> Path:
+    """The raw image if it exists in any accepted format, else the .png path it should have."""
+    for ext in RAW_EXTS:
+        p = raw_root / f.id / f"{image}{ext}"
+        if p.exists():
+            return p
     return raw_root / f.id / f"{image}.png"
 
 
@@ -129,9 +129,11 @@ def render_markdown(roster: dict, raw_root: Path = RAW) -> str:
         "1. Open Google Flow (or Gemini) with the best image model on offer.",
         "2. Generate the **reference** first. It defines the fighter. Re-roll until it is a clean side view facing right, "
         "arms slightly away from the body, nothing cut off. Save it as `rig_raw/<id>/reference.png`.",
-        "3. Attach `reference.png` as an ingredient/reference image for the other three prompts.",
-        "4. Parts sheets: re-roll if parts touch or overlap, or if a joint has no rounded overlap. "
-        "Missing pieces can be generated on their own afterwards (same prompt, ask for one part).",
+        "   The reference is only the approved look and an assembly guide; it is never cut, so a three-quarter view is OK.",
+        "3. Attach `reference.png` as an ingredient/reference image for the parts sheet and the portrait.",
+        "4. Parts sheet: this is what gets cut. Re-roll if pieces touch, a part is missing or appears twice, "
+        "or a faint ghost of the whole body shows in the background. Missing pieces can be generated on their own "
+        "afterwards (same prompt, ask for one part). Far-side limbs are made from the near ones, so don't generate them.",
         "5. Real photos help most: attach a photo of the actual garment or pattern (pakol, ajrak, phulkari, "
         "Swati embroidery, Baloch pudo pocket) next to the reference when the model gets it wrong.",
         "",
