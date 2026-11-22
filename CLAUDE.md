@@ -42,6 +42,14 @@ Read `README.md` first for layout, commands and controls. The user knows Python 
 - Raw Flow images go in `tools/sprite_pipeline/flow_raw/` (git-ignored). `prompts/PROMPTS.md` is generated, so edit the spec instead.
 - Sprite frames face right, feet at `anchor`, drawn at `scale` (0.5 = 2x supersampled).
 
+## Rig art (version 4)
+- `tools/rig_art/roster.toml` is the source of truth for the 16-fighter roster (province × urban/rural × male/female)
+  and for the shared skeleton's part names. `prompts/RIG_PROMPTS.md` is generated from it; edit the roster.
+- Plan for the rig: one shared bone naming for all fighters; the view poses bones from sim state each frame
+  (never let AnimationPlayer run on its own clock); attack poses are data keyed to startup/active/recovery so
+  frame-data changes retime the animation. `scripts/sim/` stays untouched.
+- Loose garments (kameez hems, shalwar, ghagra, chadar, turban tails) need Polygon2D + bone weights or jiggle bones.
+
 ## History
 - 2026-11-21: prototype bugs fixed (commit 60ac7f4). Same day, Godot port, view, tests, pipeline and docs
   written on branch `version3-godot`. The session froze once mid-port; `fighter_sim.gd` was empty afterwards and was rewritten.

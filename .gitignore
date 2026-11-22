@@ -10,6 +10,7 @@ godot/export_presets.cfg.local
 # Sprite pipeline working dirs
 tools/sprite_pipeline/_work/
 flow_raw/
+rig_raw/
 
 # Export output
 build/

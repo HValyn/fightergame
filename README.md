@@ -131,6 +131,31 @@ Look and poses live in `tools/sprite_pipeline/art_spec.toml`. Attack animations 
 3. **Steam (Windows/Linux)**: `godot --headless --path godot --export-release Linux ../build/linux/fightergame.x86_64`
    (or `Windows`). The desktop presets set the `steam` feature tag for later Steamworks integration (e.g. GodotSteam).
 
+## Version 4: Skeleton2D route and the modern-Pakistan roster
+
+Branch `version4-godot-animation` moves the art from frame-by-frame sprites to **cutout animation**: each fighter
+is one painted character cut into parts and placed on a shared Godot `Skeleton2D`, so the animation comes from the rig,
+timed by frame data, not from ~80 generated frames per fighter.
+
+The roster (`tools/rig_art/roster.toml`) is 16 fighters: for each of Punjab, Sindh, Khyber Pakhtunkhwa and
+Balochistan, one urban man, one urban woman, one rural man and one rural woman. Three of them take over the existing
+frame data first: **Ali Changezi** (Quetta karateka) ← `ryokan`, **Hamza** (Lahore rooftop runner) ← `shadow`,
+**Bashir Pehlwan** (Gujranwala kushti wrestler) ← `titan`. The others are concepts with a fighting style; moves come later.
+
+```bash
+python tools/rig_art/rig_prompts.py prompts   # -> tools/rig_art/prompts/RIG_PROMPTS.md (4 images per fighter)
+python tools/rig_art/rig_prompts.py status
+python -m pytest -q tools/rig_art/tests
+```
+
+Per fighter: `reference.png` (side view, neutral rig pose) first, then `parts.png`, `far_parts.png` and `portrait.png`
+with the reference attached. Save into `tools/rig_art/rig_raw/<id>/` (git-ignored). Each fighter has its own chroma key
+(magenta by default, green for outfits heavy in pinks and reds). Fighters are tagged `easy`/`medium`/`hard` by how
+much loose cloth they have; rig the easy ones first (Bashir, Ali, Shahzaib, Mureed, Palwasha).
+
+Not done yet on this branch: the rig itself (shared skeleton scene, pose-data format, `FighterRig` view node driven
+by sim state), and the tool that slices a parts sheet into separate PNGs.
+
 ## Status / roadmap
 
 Done: bug-fixed prototype, full simulation port, CPU AI, menus, HUD, touch + gamepad input, sprite/stage loading,

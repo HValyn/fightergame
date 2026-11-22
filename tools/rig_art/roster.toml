@@ -1,0 +1,278 @@
+# Modern Pakistan roster for the Skeleton2D (cutout) route.
+#
+#   python tools/rig_art/rig_prompts.py prompts   # -> tools/rig_art/prompts/RIG_PROMPTS.md
+#   python tools/rig_art/rig_prompts.py status    # what's in rig_raw/ and what's missing
+#
+# 4 provinces x (urban, rural) x (male, female) = 16 fighters.
+# Each fighter needs only 4 images (reference, parts sheet, far-side parts sheet, portrait);
+# the animation comes from the Godot rig, not from generated frames.
+#
+# Fields
+#   moveset   which existing frame-data file this fighter takes over first
+#             (godot/data/characters/<moveset>.json), or "" = concept only, moves not designed yet
+#   style     fighting style, for move design later (not sent to the image model)
+#   look      sent to the image model. Be concrete: garments, colours, materials, hair, shoes.
+#   key       chroma background for this fighter. Default magenta; use green for outfits
+#             heavy in pink/red/magenta (phulkari, chunri, Swati embroidery, Baloch reds).
+#   cloth     loose pieces that must be cut as their own parts (Polygon2D + bone weights / jiggle)
+#   props     held or worn objects that get their own bone
+#   rig       easy | medium | hard  (how much loose cloth there is). Rig the easy ones first.
+
+[style]
+preamble = "2D fighting game character art made for cutout (puppet) animation, hand-painted cel-shaded illustration, bold clean dark outlines, flat even lighting with simple two-tone shading, vivid colours with accents inspired by Pakistani truck art, strong readable silhouette, contemporary Pakistan, grounded and respectful, not a caricature"
+rig_pose = "full body from head to feet, strict side view (profile) facing to the RIGHT of the image, neutral rig pose: standing upright, feet a little apart, arms held slightly away from the body with elbows a little bent, hands relaxed, no limb overlapping the torso, no cast shadows, no floor, no text, no watermark, no other characters"
+default_key = "#FF00FF"
+
+# One skeleton shared by every fighter (bone names = part names = Godot Bone2D names).
+# near_* = the limb closer to the camera, far_* = the one behind the body.
+[skeleton]
+core = ["head", "chest", "pelvis"]
+limbs = ["upper_arm", "forearm", "hand", "thigh", "shin", "foot"]
+
+# ---------------------------------------------------------------- Punjab
+[[fighter]]
+id = "hamza"
+name = "Hamza"
+title = "The Rooftop Runner"
+province = "Punjab"
+place = "Walled City, Lahore"
+setting = "urban"
+gender = "male"
+moveset = "shadow"
+style = "fast rushdown, double jump, air dash; vanishes over a rooftop edge and drops behind you; throws a weighted kite-string spool (charkhi) instead of a kunai"
+look = "Hamza, a wiry Lahori rooftop runner in his early twenties from the Walled City, messy black hair, light stubble, warm brown skin, faded black kurta cut short at the hip with sleeves rolled to the elbow, olive cargo joggers, worn grey sneakers, a yellow-and-pink kite-string spool (charkhi) clipped to his belt, a red cloth tied around his left forearm, mischievous grin"
+cloth = ["kurta hem"]
+props = ["charkhi spool"]
+rig = "medium"
+
+[[fighter]]
+id = "ayesha"
+name = "Ayesha"
+title = "The Campus Kickboxer"
+province = "Punjab"
+place = "Lahore"
+setting = "urban"
+gender = "female"
+moveset = ""
+style = "kickboxing: long-range kicks, strong anti-airs, footsies specialist"
+look = "Ayesha, an athletic Lahori university student and amateur kickboxer in her early twenties, warm light-brown skin, shoulder-length black hair in a high ponytail, short fitted teal kurti with side slits over black athletic leggings, a white dupatta tied tightly around her waist as a sash, fingerless red MMA gloves, white running shoes, focused fierce expression"
+cloth = ["kurti side panels", "dupatta sash ends", "ponytail"]
+props = []
+rig = "medium"
+
+[[fighter]]
+id = "bashir"
+name = "Bashir Pehlwan"
+title = "The Akhara Lion"
+province = "Punjab"
+place = "village akhara near Gujranwala"
+setting = "rural"
+gender = "male"
+moveset = "titan"
+style = "heavyweight kushti grappler with armor; Ground Pound slams the akhara clay, Mega Slam is a dhobi pachhar shoulder throw"
+look = "Bashir, a massive Punjabi pehlwan (traditional kushti wrestler) in his thirties, huge shoulders and thick neck, shaved head, thick handlebar mustache, warm brown skin dusted with reddish akhara clay, red cotton langot wrestling loincloth with a short white cotton tehmat wrapped over it, black thread tied on one wrist, bare feet, a heavy wooden mugdar club strapped diagonally across his back"
+cloth = ["tehmat hem"]
+props = ["mugdar club on back"]
+rig = "easy"
+
+[[fighter]]
+id = "rani"
+name = "Rani"
+title = "Daughter of the Wheat Fields"
+province = "Punjab"
+place = "village near Sahiwal"
+setting = "rural"
+gender = "female"
+moveset = ""
+style = "staff fighter: long-reach lathi pokes and sweeps, zoning, pole-vault jump-in"
+look = "Rani, a sturdy, confident Punjabi farm woman in her late twenties, sun-warmed brown skin, long black hair in a thick braid ending in a colourful paranda tassel, mustard-yellow cotton kurta with sleeves pushed up, loose white shalwar tucked at the ankle, a red-and-orange phulkari dupatta tied crosswise around her chest and waist, silver jhumka earrings, plain leather khussa shoes, holding a long bamboo lathi staff"
+cloth = ["kurta hem", "shalwar legs", "phulkari dupatta ends", "braid with paranda"]
+props = ["lathi staff"]
+rig = "medium"
+key = "#00FF00"
+
+# ---------------------------------------------------------------- Sindh
+[[fighter]]
+id = "shahzaib"
+name = "Shahzaib"
+title = "The Lyari Southpaw"
+province = "Sindh"
+place = "Lyari, Karachi"
+setting = "urban"
+gender = "male"
+moveset = ""
+style = "boxer: fast jabs, weaving, short dashes, body-blow combos, no kicks"
+look = "Shahzaib, a compact, quick Lyari boxer from Karachi in his mid-twenties, dark brown skin, short curly black hair, thin mustache, sleeveless sweat-darkened green-and-white football jersey with the number 10, black boxing shorts over grey track pants, blue boxing gloves, battered sneakers, a thin black cord necklace, cocky southpaw stance energy"
+cloth = []
+props = []
+rig = "easy"
+
+[[fighter]]
+id = "sana"
+name = "Sana"
+title = "Full Throttle"
+province = "Sindh"
+place = "Karachi"
+setting = "urban"
+gender = "female"
+moveset = ""
+style = "taekwondo: spinning and axe kicks, fast air game, slide under highs"
+look = "Sana, a Karachi motorbike delivery rider and taekwondo black belt in her mid-twenties, light-brown skin, short wavy hair under a sporty black headband, oversized faded denim jacket with sleeves pushed up over a fitted maroon kurti, black jeans, chunky white high-top sneakers, an indigo-and-red ajrak-print bandana tied around her neck, a scratched open-face helmet clipped to her hip, quick confident smirk"
+cloth = ["kurti hem", "denim jacket tails"]
+props = ["helmet on hip"]
+rig = "medium"
+
+[[fighter]]
+id = "mureed"
+name = "Mureed"
+title = "The Malakhro Bull"
+province = "Sindh"
+place = "village near Hyderabad"
+setting = "rural"
+gender = "male"
+moveset = ""
+style = "malakhro wrestler: belt-grab throws, command grabs at two ranges, slow but huge damage"
+look = "Mureed, a broad-chested Sindhi malakhro wrestler in his late thirties, dark brown skin, thick curled mustache and short beard, a round Sindhi topi cap with mirror-work embroidery, bare muscular torso, a twisted indigo-and-red ajrak cloth tied tightly around his waist as the malakhro grip belt, loose white shalwar, barefoot"
+cloth = ["shalwar legs"]
+props = []
+rig = "easy"
+
+[[fighter]]
+id = "marvi"
+name = "Marvi"
+title = "The Unbowed of Thar"
+province = "Sindh"
+place = "Thar desert"
+setting = "rural"
+gender = "female"
+moveset = ""
+style = "shepherd's staff and shawl: hooking pulls, shawl whip at mid range, refuses to be knocked down (one armored move)"
+look = "Marvi, a fierce young Thari woman in her early twenties from the Thar desert, deep brown sun-weathered skin, kohl-lined eyes, a small gold nose ring, a long red-and-black block-printed chunri shawl draped over her head and across her body, a mirror-work embroidered bodice, a full ankle-length flared skirt (ghagra) in deep red with patchwork rilli borders, rows of white bangles on both forearms, barefoot, holding a curved wooden shepherd's staff"
+cloth = ["ghagra skirt (front and back panels)", "chunri shawl tail"]
+props = ["shepherd's staff"]
+rig = "hard"
+key = "#00FF00"
+
+# ---------------------------------------------------------------- Khyber Pakhtunkhwa
+[[fighter]]
+id = "asfandyar"
+name = "Asfandyar"
+title = "The Qissa Khwani Storyteller"
+province = "Khyber Pakhtunkhwa"
+place = "Qissa Khwani Bazaar, Peshawar"
+setting = "urban"
+gender = "male"
+moveset = ""
+style = "all-rounder with spinning attan-inspired footwork; chadar snap as a mid-range poke"
+look = "Asfandyar, a tall Peshawari in his late twenties who runs his family's chai stall in Qissa Khwani Bazaar, wheatish skin, neat full black beard, grey-brown pakol wool cap, starched off-white shalwar kameez with sleeves rolled up, black embroidered waistcoat, leather Peshawari chappals, a brown chequered chadar slung over one shoulder, calm intense eyes"
+cloth = ["kameez hem (front and back)", "shalwar legs", "chadar"]
+props = []
+rig = "medium"
+
+[[fighter]]
+id = "palwasha"
+name = "Palwasha"
+title = "Off the Back Wall"
+province = "Khyber Pakhtunkhwa"
+place = "Peshawar"
+setting = "urban"
+gender = "female"
+moveset = ""
+style = "squash champion: racquet strikes, ricochets a ball off the stage edge as a projectile, fast reads"
+look = "Palwasha, a lean, explosive squash champion from Peshawar in her early twenties, wheatish skin, dark hair tightly tied back under a black sports headwrap, fitted white-and-green squash polo, black track pants with white side stripes, white court shoes, a squash racquet in her right hand, a white sweatband on the wrist, determined stare"
+cloth = []
+props = ["squash racquet"]
+rig = "easy"
+
+[[fighter]]
+id = "zarghun"
+name = "Zarghun"
+title = "The Mountain Shepherd"
+province = "Khyber Pakhtunkhwa"
+place = "upper Swat valley"
+setting = "rural"
+gender = "male"
+moveset = ""
+style = "slow heavy grappler; swings his woollen patu shawl to catch and throw"
+look = "Zarghun, a rugged shepherd from the mountains of upper Swat in his early forties, weathered wheatish skin, grey-streaked beard, a brown Chitrali pakol cap, a thick oatmeal-coloured woollen patu shawl wrapped around his shoulders and body, dark brown shalwar kameez, heavy leather chappals, gnarled strong hands"
+cloth = ["patu shawl (back drape and hanging end)", "kameez hem", "shalwar legs"]
+props = []
+rig = "hard"
+
+[[fighter]]
+id = "shazia"
+name = "Shazia"
+title = "The Swat Climber"
+province = "Khyber Pakhtunkhwa"
+place = "village in Swat valley"
+setting = "rural"
+gender = "female"
+moveset = ""
+style = "acrobat: wall-jumps off the stage edge, cartwheel kicks, low-profile slides"
+look = "Shazia, a nimble young woman in her early twenties from a Swat valley village, fair skin with rosy cheeks, long dark hair in two braids, a black cotton frock-style kameez covered with dense geometric pink-and-red Swati embroidery on the chest and sleeves, black shalwar, a deep-red chadar tied around her head and shoulders, a silver bead necklace, sturdy black jutti shoes"
+cloth = ["frock kameez skirt", "chadar ends", "braids"]
+props = []
+rig = "medium"
+key = "#00FF00"
+
+# ---------------------------------------------------------------- Balochistan
+[[fighter]]
+id = "ali"
+name = "Ali Changezi"
+title = "The Quetta Sensei"
+province = "Balochistan"
+place = "Quetta"
+setting = "urban"
+gender = "male"
+moveset = "ryokan"
+style = "balanced karateka: fireball, rising uppercut, spinning kick (takes over Ryokan's frame data)"
+look = "Ali Changezi, a disciplined karate instructor from Quetta in his late twenties with Hazara features, light skin, short black hair, clean-shaven, white karate gi top with a worn black belt over dark jeans, taped fists, bare feet, a grey hoodie tied around his waist, calm focused expression"
+cloth = ["hoodie sleeves at the waist"]
+props = []
+rig = "easy"
+
+[[fighter]]
+id = "mahnaz"
+name = "Mahnaz"
+title = "The Tide of Gwadar"
+province = "Balochistan"
+place = "Gwadar"
+setting = "urban"
+gender = "female"
+moveset = ""
+style = "fluid counter-fighter: parries, flowing chained kicks, a crashing-wave special"
+look = "Mahnaz, a marine-biology student and free-diver from Gwadar in her mid-twenties, dark brown skin, curly black hair tied up high, a modern knee-length Baloch dress (pashk) in deep blue with the traditional large embroidered front pocket (pudo) and embroidered cuffs in red and gold, fitted black trousers, white sneakers, a faded denim jacket tied around her waist, sea-salt bracelets"
+cloth = ["pashk hem", "jacket sleeves at the waist"]
+props = []
+rig = "medium"
+
+[[fighter]]
+id = "chakar"
+name = "Chakar"
+title = "The Makran Wind"
+province = "Balochistan"
+place = "Makran desert"
+setting = "rural"
+gender = "male"
+moveset = ""
+style = "long-reach herding stick, turban-cloth whip, big slow swings that control space"
+look = "Chakar, a towering Baloch camel herder from the Makran desert in his forties, deep bronze skin, shoulder-length curly black hair, full beard, a large white Baloch turban (pag) with a long trailing end, a long white kameez reaching below the knee, very wide white Baloch shalwar gathered at the ankle, an embroidered black waistcoat, leather sandals, a wooden herding stick"
+cloth = ["turban tail", "long kameez (front and back panels)", "wide shalwar legs"]
+props = ["herding stick"]
+rig = "hard"
+
+[[fighter]]
+id = "haani"
+name = "Haani"
+title = "Keeper of the Hills"
+province = "Balochistan"
+place = "hills near Kalat"
+setting = "rural"
+gender = "female"
+moveset = ""
+style = "chadar fighter: long cloth wraps that pull and trip, heavy silver-bangle backfists"
+look = "Haani, a proud Baloch woman from the hills near Kalat in her thirties, deep brown skin, kohl-lined eyes, long braided hair, a full-length crimson Baloch dress densely covered in mirror-work and geometric embroidery with the large embroidered front pocket (pudo), a long black chadar over her head trailing behind her, heavy silver jewellery on her wrists and neck, barefoot"
+cloth = ["dress skirt (front and back panels)", "black chadar tail"]
+props = []
+rig = "hard"
+key = "#00FF00"
